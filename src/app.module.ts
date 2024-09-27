@@ -5,8 +5,11 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UserModule } from './user/user.module';
+import { MailModule } from './mail/mail.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
+import environmentValidation from './config/environment.validation';
 
 const ENV = process.env.NODE_ENV
 
@@ -16,7 +19,8 @@ const ENV = process.env.NODE_ENV
     ConfigModule.forRoot({
       isGlobal:true,
       envFilePath:!ENV ? '.env' : `.env.${ENV}`,
-      load:[appConfig, databaseConfig]
+      load:[appConfig, databaseConfig],
+      validationSchema: environmentValidation
 
 
     }),
@@ -34,9 +38,12 @@ const ENV = process.env.NODE_ENV
         autoLoadEntities: configService.get('database.autoLoadEntities'),
         database:configService.get('database.name'),  
       })
-    })
+    }),
+    UserModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],
+
 })
 export class AppModule {}
