@@ -88,9 +88,38 @@ export class AuthService {
         access_token:this.jwtService.sign(payload)
       }
     }
+
+    async forgotPassword(email:string): Promise<{message:string}>{
+      const user = await this.userService.findByEmail(email)
+      if(!user){
+        throw new BadRequestException('User does not exist')
+      }
+      return await this.sendOtp(email)
+    }
+
+    async verifyOtp(email:string, otp:string):Promise<{message:string}>{
+      const user = await this.userService.findByEmail(email)
+      console.log(user)
+      if(!user || user.verificationCode !== otp){
+        throw new BadRequestException('Invalid OTP or email ');
+      
+      }
+      await this.userRepository.update({email}, {verificationCode:null})
+      return {message:'otp verified sucessfully you can now reset your password'}
+    }
+  
+  async resetPassword(email:string, newPassword:string): Promise<{message:string}>{
+    const user = await this.userService.findByEmail(email)
+    if(!user){
+      throw new BadRequestException('user does not exist')
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+    await this.userRepository.update({email}, {password:hashedPassword})
+    return{message: 'password reset successfully'}
   }
   
-
-
+  }
+  
+  
 
 
