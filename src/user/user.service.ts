@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
@@ -14,5 +14,19 @@ export class UserService {
 
     async findByEmail(email:string){
         return this.userRepository.findOne({where: {email}})
+    }
+
+    async getAllUser(){
+     const user = await this.userRepository.find()
+     return user
+    }
+
+    async getUserById(userId:string){
+        const user = await this.userRepository.findOne({where: {id:userId}})
+        if(!user){
+            throw new BadRequestException(`User with ${userId} not found`)
+        }
+        return user
+
     }
 }
